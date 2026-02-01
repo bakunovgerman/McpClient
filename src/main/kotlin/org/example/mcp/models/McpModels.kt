@@ -180,7 +180,7 @@ data class CallToolResult(
 
 @Serializable
 data class ToolContent(
-    val type: String,
+    val type: String = "text",  // Default to "text" type if not specified
     val text: String? = null,
     val data: String? = null,
     val mimeType: String? = null
