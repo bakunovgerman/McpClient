@@ -21,7 +21,7 @@
 group = "io.github.germanbakunov" // Замените на ваш GitHub username
 
 pom {
-    url.set("https://github.com/germanbakunov/McpClient") // Ваш GitHub URL
+    url.set("https://github.com/bakunovgerman/McpClient") // Ваш GitHub URL
     
     developers {
         developer {
@@ -32,9 +32,9 @@ pom {
     }
     
     scm {
-        connection.set("scm:git:git://github.com/germanbakunov/McpClient.git")
-        developerConnection.set("scm:git:ssh://github.com/germanbakunov/McpClient.git")
-        url.set("https://github.com/germanbakunov/McpClient")
+        connection.set("scm:git:git://github.com/bakunovgerman/McpClient.git")
+        developerConnection.set("scm:git:ssh://github.com/bakunovgerman/McpClient.git")
+        url.set("https://github.com/bakunovgerman/McpClient")
     }
 }
 ```
@@ -51,10 +51,10 @@ pom {
 
 ```bash
 # Если репозиторий еще не настроен
-git remote add origin https://github.com/germanbakunov/McpClient.git
+git remote add origin https://github.com/bakunovgerman/McpClient.git
 
 # Или обновите remote
-git remote set-url origin https://github.com/germanbakunov/McpClient.git
+git remote set-url origin https://github.com/bakunovgerman/McpClient.git
 
 # Закоммитьте изменения
 git add .

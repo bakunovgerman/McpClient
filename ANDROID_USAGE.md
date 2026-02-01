@@ -432,7 +432,7 @@ class McpViewModelTest {
 
 ## Полный пример проекта
 
-См. пример Android приложения: [examples/android-app](https://github.com/germanbakunov/McpClient/tree/main/examples/android-app) (если доступно)
+См. пример Android приложения: [examples/android-app](https://github.com/bakunovgerman/McpClient/tree/main/examples/android-app) (если доступно)
 
 ## Troubleshooting
 

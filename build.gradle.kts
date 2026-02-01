@@ -6,7 +6,7 @@ plugins {
     signing
 }
 
-group = "io.github.germanbakunov" // Замените на ваш GitHub username
+group = "io.github.bakunovgerman" // Замените на ваш GitHub username
 version = "1.0.0"
 
 repositories {
@@ -71,7 +71,7 @@ publishing {
             pom {
                 name.set("MCP Client for Kotlin/JVM")
                 description.set("A Kotlin/JVM client library for Model Context Protocol (MCP)")
-                url.set("https://github.com/germanbakunov/McpClient") // Замените на ваш GitHub URL
+                url.set("https://github.com/bakunovgerman/McpClient") // Замените на ваш GitHub URL
                 
                 licenses {
                     license {
@@ -89,9 +89,9 @@ publishing {
                 }
                 
                 scm {
-                    connection.set("scm:git:git://github.com/germanbakunov/McpClient.git")
-                    developerConnection.set("scm:git:ssh://github.com/germanbakunov/McpClient.git")
-                    url.set("https://github.com/germanbakunov/McpClient")
+                    connection.set("scm:git:git://github.com/bakunovgerman/McpClient.git")
+                    developerConnection.set("scm:git:ssh://github.com/bakunovgerman/McpClient.git")
+                    url.set("https://github.com/bakunovgerman/McpClient")
                 }
             }
         }

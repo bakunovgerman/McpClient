@@ -54,7 +54,7 @@ group = "io.github.germanbakunov" // Ваш GitHub username
 
 ```bash
 # Добавьте remote (если еще не добавлен)
-git remote add origin https://github.com/germanbakunov/McpClient.git
+git remote add origin https://github.com/bakunovgerman/McpClient.git
 
 # Закоммитьте все изменения
 git add .
@@ -65,7 +65,7 @@ git push -u origin main
 ### Шаг 3: Создайте первый release
 
 **Вариант A: Через GitHub UI**
-1. Перейдите на https://github.com/germanbakunov/McpClient
+1. Перейдите на https://github.com/bakunovgerman/McpClient
 2. Releases → Create a new release
 3. Tag: `v1.0.0`
 4. Title: "First Release v1.0.0"
@@ -205,7 +205,7 @@ implementation("com.github.germanbakunov:McpClient:main-SNAPSHOT")
    - Кликните на версию для просмотра логов
 
 3. **Проверьте GitHub Actions:**
-   - https://github.com/germanbakunov/McpClient/actions
+   - https://github.com/bakunovgerman/McpClient/actions
 
 4. **Создайте Issue:**
    - Если проблема сохраняется, создайте issue в репозитории
