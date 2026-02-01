@@ -11,6 +11,7 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 import org.example.mcp.models.*
@@ -19,6 +20,7 @@ import java.util.UUID
 /**
  * MCP Client for connecting to remote MCP servers
  */
+@OptIn(ExperimentalSerializationApi::class)
 class McpClient(
     private val config: McpConfig,
     private val clientName: String = "KotlinMcpClient",

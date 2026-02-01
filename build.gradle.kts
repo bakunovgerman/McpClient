@@ -82,7 +82,7 @@ publishing {
                 
                 developers {
                     developer {
-                        id.set("germanbakunov") // Ваш GitHub username
+                        id.set("bakunovgerman") // Ваш GitHub username
                         name.set("German Bakunov") // Ваше имя
                         email.set("your.email@example.com") // Ваш email
                     }
