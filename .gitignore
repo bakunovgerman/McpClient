@@ -45,3 +45,12 @@ local.properties
 # Test outputs
 test-results/
 test-output/
+
+# Maven/Publishing
+*.asc
+*.gpg
+gradle.properties.bak
+signing.properties
+
+# Local Maven repository (for testing)
+.m2/

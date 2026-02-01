@@ -1,5 +1,8 @@
 # 🚀 MCP Client для Kotlin
 
+[![](https://jitpack.io/v/germanbakunov/McpClient.svg)](https://jitpack.io/#germanbakunov/McpClient)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Полнофункциональный клиент для подключения к удаленным MCP (Model Context Protocol) серверам.
 
 ## ✨ Возможности
@@ -23,6 +26,52 @@
 - Kotlin 2.2.21+
 
 ## Установка
+
+### Вариант 1: Использование как Gradle зависимости (Рекомендуется)
+
+Добавьте JitPack репозиторий в ваш проект:
+
+**settings.gradle.kts (Kotlin DSL):**
+```kotlin
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url = uri("https://jitpack.io") }
+    }
+}
+```
+
+**settings.gradle (Groovy):**
+```groovy
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+Добавьте зависимость в ваш модуль:
+
+**build.gradle.kts (Kotlin DSL):**
+```kotlin
+dependencies {
+    implementation("com.github.germanbakunov:McpClient:1.0.0")
+}
+```
+
+**build.gradle (Groovy):**
+```groovy
+dependencies {
+    implementation 'com.github.germanbakunov:McpClient:1.0.0'
+}
+```
+
+> 📘 Подробнее о публикации и использовании смотрите в [PUBLISHING.md](PUBLISHING.md)
+
+### Вариант 2: Клонирование репозитория
 
 1. Клонируйте репозиторий
 2. Установите зависимости:
