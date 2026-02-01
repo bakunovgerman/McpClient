@@ -9,13 +9,6 @@ import org.example.mcp.McpConfig
 fun main() = runBlocking {
     println("=== MCP Client Example ===\n")
 
-    val apiKey = try {
-        org.example.mcp.McpUtils.requireProperty("local.properties", "CONTEXT7_API_KEY")
-    } catch (e: Exception) {
-        println("Error: ${e.message}")
-        return@runBlocking
-    }
-
     val config = McpConfig(
         url = "https://fittable-deeanna-noneditorially.ngrok-free.dev/mcp",
         headers = mapOf()
