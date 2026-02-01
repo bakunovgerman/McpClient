@@ -1,0 +1,221 @@
+# 🚀 Начало работы с MCP Client
+
+## Что это?
+
+**MCP Client для Kotlin** - это полнофункциональный клиент для работы с удаленными MCP (Model Context Protocol) серверами.
+
+## ⚡ Быстрый старт (3 шага)
+
+### Шаг 1: Установите Java 24
+
+```bash
+# macOS (SDKMAN - рекомендуется)
+curl -s "https://get.sdkman.io" | bash
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+sdk install java 24-open
+```
+
+Подробнее: [INSTALLATION.md](INSTALLATION.md)
+
+### Шаг 2: Установите API ключ
+
+Создайте файл `local.properties` в корне проекта:
+
+```properties
+CONTEXT7_API_KEY=your_api_key_here
+```
+
+Или скопируйте пример:
+```bash
+cp local.properties.example local.properties
+# Затем отредактируйте local.properties и добавьте ваш ключ
+```
+
+Получите ключ на: https://context7.com
+
+### Шаг 3: Запустите
+
+```bash
+cd /Users/germanbakunov/Desktop/day11/day11
+./gradlew build
+./gradlew run
+```
+
+## 📚 Что дальше?
+
+### Для новичков
+
+1. **[QUICKSTART.md](QUICKSTART.md)** - Быстрое введение с примерами
+2. **[EXAMPLES.md](EXAMPLES.md)** - Подробные примеры использования
+3. Запустите интерактивный CLI: `./run-interactive.sh`
+
+### Для разработчиков
+
+1. **[README.md](README.md)** - Полная документация API
+2. **[ARCHITECTURE.md](ARCHITECTURE.md)** - Архитектура проекта
+3. Изучите код в `src/main/kotlin/org/example/`
+
+## 🎯 Примеры
+
+### Базовое использование
+
+```kotlin
+import org.example.mcp.McpUtils
+
+// Загрузить API ключ из local.properties
+val apiKey = McpUtils.requireProperty("local.properties", "CONTEXT7_API_KEY")
+
+val config = McpConfig(
+    url = "https://mcp.context7.com/mcp",
+    headers = mapOf("CONTEXT7_API_KEY" to apiKey)
+)
+
+val client = McpClient(config)
+client.initialize()
+val tools = client.listTools()
+```
+
+### Вызов инструмента
+
+```kotlin
+val result = client.callTool("resolve-library-id", buildJsonObject {
+    put("libraryName", "react")
+    put("query", "How to use hooks?")
+})
+```
+
+### Запуск примеров
+
+```bash
+./run-basic.sh        # Базовый пример
+./run-tool-call.sh    # Вызов инструментов
+./run-batch.sh        # Batch операции
+./run-interactive.sh  # Интерактивный CLI
+```
+
+## 📖 Документация
+
+| Файл | Описание |
+|------|----------|
+| [README.md](README.md) | Основная документация |
+| [QUICKSTART.md](QUICKSTART.md) | Быстрый старт |
+| [EXAMPLES.md](EXAMPLES.md) | Примеры использования |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Архитектура |
+| [INSTALLATION.md](INSTALLATION.md) | Установка и настройка |
+| [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) | Сводка проекта |
+
+## 🔧 Основные команды
+
+```bash
+# Сборка
+./gradlew build
+
+# Запуск
+./gradlew run
+
+# Тесты
+./gradlew test
+
+# Очистка
+./gradlew clean
+```
+
+## ✨ Возможности
+
+- ✅ Полная поддержка MCP протокола
+- ✅ JSON-RPC 2.0
+- ✅ Асинхронная работа (Kotlin Coroutines)
+- ✅ Tools, Resources, Prompts
+- ✅ Batch операции
+- ✅ Интерактивный CLI
+- ✅ Подробное логирование
+- ✅ Примеры и тесты
+
+## 📂 Структура
+
+```
+day11/
+├── 📄 Документация (README, EXAMPLES, и др.)
+├── 🔧 Скрипты (run-*.sh)
+└── src/
+    ├── main/kotlin/
+    │   ├── Main.kt
+    │   ├── examples/         # 5 примеров
+    │   └── mcp/              # Библиотека
+    └── test/kotlin/          # Тесты
+```
+
+## 🆘 Помощь
+
+### Проблемы с установкой?
+
+→ Смотрите [INSTALLATION.md](INSTALLATION.md)
+
+### Как использовать?
+
+→ Смотрите [QUICKSTART.md](QUICKSTART.md) и [EXAMPLES.md](EXAMPLES.md)
+
+### Нужна документация API?
+
+→ Смотрите [README.md](README.md)
+
+### Интересует архитектура?
+
+→ Смотрите [ARCHITECTURE.md](ARCHITECTURE.md)
+
+## 🎓 Обучение
+
+### Шаг 1: Основы
+
+Запустите базовый пример:
+```bash
+./run-basic.sh
+```
+
+Изучите код: `src/main/kotlin/org/example/examples/BasicExample.kt`
+
+### Шаг 2: Инструменты
+
+Запустите пример с инструментами:
+```bash
+./run-tool-call.sh
+```
+
+Изучите код: `src/main/kotlin/org/example/examples/ToolCallExample.kt`
+
+### Шаг 3: Продвинутые возможности
+
+Запустите batch операции:
+```bash
+./run-batch.sh
+```
+
+Изучите код: `src/main/kotlin/org/example/examples/BatchOperationsExample.kt`
+
+### Шаг 4: Интерактивный режим
+
+Поэкспериментируйте с интерактивным CLI:
+```bash
+./run-interactive.sh
+```
+
+## 💡 Советы
+
+1. **Начните с интерактивного CLI** - это самый простой способ понять как работает MCP
+2. **Изучайте примеры** - все примеры хорошо документированы
+3. **Читайте комментарии в коде** - код содержит подробные объяснения
+4. **Используйте утилиты** - `McpUtils` упрощает работу с MCP
+5. **Обрабатывайте ошибки** - используйте try-catch с `McpException`
+
+## 🎉 Готово!
+
+Теперь у вас есть все необходимое для работы с MCP! 
+
+**Следующие шаги:**
+1. ✅ Установите Java 24
+2. ✅ Получите API ключ Context7
+3. ✅ Соберите проект: `./gradlew build`
+4. ✅ Запустите пример: `./gradlew run`
+5. ✅ Изучайте документацию и примеры
+
+Удачи! 🚀
