@@ -1,0 +1,39 @@
+[Unit]
+Description=Weather AI Server - Intelligent weather monitoring with AI
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=weatherapp
+Group=weatherapp
+WorkingDirectory=/home/weatherapp/weather-ai-server
+
+# Переменные окружения
+EnvironmentFile=/home/weatherapp/weather-ai-server/config/env.conf
+
+# Запуск приложения
+ExecStart=/usr/bin/java -jar /home/weatherapp/weather-ai-server/build/libs/McpClient-1.0-SNAPSHOT.jar
+
+# Автоматический перезапуск при сбое
+Restart=always
+RestartSec=10
+
+# Логирование
+StandardOutput=append:/home/weatherapp/weather-ai-server/logs/app.log
+StandardError=append:/home/weatherapp/weather-ai-server/logs/error.log
+SyslogIdentifier=weather-ai
+
+# Ограничения ресурсов (опционально)
+MemoryLimit=512M
+CPUQuota=50%
+
+# Безопасность (опционально, раскомментируйте при необходимости)
+# NoNewPrivileges=true
+# PrivateTmp=true
+# ProtectSystem=strict
+# ProtectHome=true
+# ReadWritePaths=/home/weatherapp/weather-ai-server/data /home/weatherapp/weather-ai-server/logs
+
+[Install]
+WantedBy=multi-user.target

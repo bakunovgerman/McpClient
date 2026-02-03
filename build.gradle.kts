@@ -1,126 +1,74 @@
 plugins {
-    kotlin("jvm") version "2.0.21"
-    kotlin("plugin.serialization") version "2.0.21"
+    kotlin("jvm") version "1.9.22"
+    kotlin("plugin.serialization") version "1.9.22"
     application
-    `maven-publish`
-    signing
 }
 
-group = "io.github.bakunovgerman" // Замените на ваш GitHub username
-version = "1.0.0"
+group = "org.example"
+version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    // Kotlin coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+    // Ktor Server
+    implementation("io.ktor:ktor-server-core:2.3.7")
+    implementation("io.ktor:ktor-server-netty:2.3.7")
+    implementation("io.ktor:ktor-server-content-negotiation:2.3.7")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
     
-    // Ktor client for HTTP requests
+    // Ktor Client для OpenRouter
     implementation("io.ktor:ktor-client-core:2.3.7")
     implementation("io.ktor:ktor-client-cio:2.3.7")
     implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
     implementation("io.ktor:ktor-client-logging:2.3.7")
-
-    // JSON serialization
+    
+    // Exposed (SQL ORM)
+    implementation("org.jetbrains.exposed:exposed-core:0.45.0")
+    implementation("org.jetbrains.exposed:exposed-dao:0.45.0")
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.45.0")
+    implementation("org.jetbrains.exposed:exposed-java-time:0.45.0")
+    
+    // H2 Database
+    implementation("com.h2database:h2:2.2.224")
+    
+    // PostgreSQL (для production)
+    implementation("org.postgresql:postgresql:42.7.1")
+    
+    // Logback для логирования
+    implementation("ch.qos.logback:logback-classic:1.4.14")
+    
+    // Kotlinx Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
     
+    // Kotlinx Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    
+    // Kotlinx DateTime
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
+    
     testImplementation(kotlin("test"))
-}
-
-kotlin {
-    jvmToolchain(21)
-}
-
-application {
-    mainClass.set("org.example.MainKt")
 }
 
 tasks.test {
     useJUnitPlatform()
 }
 
-// Создание source jar для публикации
-val sourcesJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("sources")
-    from(sourceSets.main.get().allSource)
+kotlin {
+    jvmToolchain(17)
 }
 
-// Создание javadoc jar для публикации
-val javadocJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("javadoc")
-    from(tasks.javadoc)
+application {
+    mainClass.set("org.example.weather.WeatherServerKt")
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = project.group.toString()
-            artifactId = "mcp-client"
-            version = project.version.toString()
-            
-            from(components["java"])
-            artifact(sourcesJar)
-            artifact(javadocJar)
-            
-            pom {
-                name.set("MCP Client for Kotlin/JVM")
-                description.set("A Kotlin/JVM client library for Model Context Protocol (MCP)")
-                url.set("https://github.com/bakunovgerman/McpClient") // Замените на ваш GitHub URL
-                
-                licenses {
-                    license {
-                        name.set("MIT License")
-                        url.set("https://opensource.org/licenses/MIT")
-                    }
-                }
-                
-                developers {
-                    developer {
-                        id.set("bakunovgerman") // Ваш GitHub username
-                        name.set("German Bakunov") // Ваше имя
-                        email.set("your.email@example.com") // Ваш email
-                    }
-                }
-                
-                scm {
-                    connection.set("scm:git:git://github.com/bakunovgerman/McpClient.git")
-                    developerConnection.set("scm:git:ssh://github.com/bakunovgerman/McpClient.git")
-                    url.set("https://github.com/bakunovgerman/McpClient")
-                }
-            }
-        }
+tasks.jar {
+    manifest {
+        attributes["Main-Class"] = "org.example.weather.WeatherServerKt"
     }
     
-    repositories {
-        // Для локального тестирования
-        maven {
-            name = "Local"
-            url = uri(layout.buildDirectory.dir("repo"))
-        }
-        
-        // Для Maven Central (потребуется настройка Sonatype OSSRH)
-        maven {
-            name = "OSSRH"
-            url = if (version.toString().endsWith("SNAPSHOT")) {
-                uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-            } else {
-                uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-            }
-            credentials {
-                username = project.findProperty("ossrhUsername")?.toString() ?: System.getenv("OSSRH_USERNAME")
-                password = project.findProperty("ossrhPassword")?.toString() ?: System.getenv("OSSRH_PASSWORD")
-            }
-        }
-    }
-}
-
-// Signing для Maven Central (опционально)
-signing {
-    // Только если настроены GPG ключи
-    if (project.hasProperty("signing.keyId")) {
-        sign(publishing.publications["maven"])
-    }
+    // Fat JAR с зависимостями
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
 }

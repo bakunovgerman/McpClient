@@ -1,0 +1,38 @@
+# Gradle
+.gradle/
+build/
+bin/
+out/
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Git
+.git/
+.gitignore
+
+# Logs
+logs/
+*.log
+
+# Data
+data/
+
+# Environment
+.env
+env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation (включим в образ только нужное)
+*.md
+!README_WEATHER_SERVER.md
+
+# Scripts
+*.sh
