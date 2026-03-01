@@ -27,7 +27,10 @@ dependencies {
 
     // JSON serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
-    
+
+    // SQLite
+    implementation("org.xerial:sqlite-jdbc:3.45.2.0")
+
     testImplementation(kotlin("test"))
 }
 

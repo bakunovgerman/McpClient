@@ -4,6 +4,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.example.mcp.McpClient
 import org.example.mcp.McpConfig
+import org.example.storage.LlmResponseDb
 import java.time.Instant
 
 private const val MCP_SERVER_URL = "https://fittable-deeanna-noneditorially.ngrok-free.dev/mcp"
@@ -23,6 +24,7 @@ fun main() {
             headers = mapOf("ngrok-skip-browser-warning" to "true")
         )
     )
+    val db = LlmResponseDb()
     Runtime.getRuntime().addShutdownHook(Thread {
         openRouterClient.close()
         mcpClient.close()
@@ -30,13 +32,15 @@ fun main() {
 
     runBlocking {
         val tools = mcpClient.listTools().tools
+        val userMessage = "мне нужно узнать сколько веток в GitHub репозитории https://github.com/bakunovgerman/McpClient"
         while (true) {
             try {
                 val response = openRouterClient.chat(
-                    userMessage = "мне нужно узнать сколько веток в GitHub репозитории https://github.com/bakunovgerman/McpClient",
+                    userMessage = userMessage,
                     tools = tools,
                     toolExecutor = { name, args -> mcpClient.callTool(name, args) }
                 )
+                db.save(userMessage, response)
                 val ts = Instant.now()
                 println("[$ts] Tools: ${tools.size}, Response: $response")
             } catch (e: Exception) {
