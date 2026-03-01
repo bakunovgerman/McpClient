@@ -14,9 +14,11 @@ data class OpenRouterMessage(
     val name: String? = null
 )
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class OpenRouterToolCall(
     val id: String,
+    @EncodeDefault
     val type: String = "function",
     val function: OpenRouterToolCallFunction
 )
@@ -33,6 +35,7 @@ data class OpenRouterChatRequest(
     val messages: List<OpenRouterMessage>,
     val temperature: Double = 1.0,
     val tools: List<ToolDefinition>? = null,
+    val tool_choice: String? = null,  // "auto" | "none" | {"type": "function", "function": {"name": "..."}}
 )
 
 @OptIn(ExperimentalSerializationApi::class)

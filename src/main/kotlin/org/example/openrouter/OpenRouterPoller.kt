@@ -33,8 +33,9 @@ fun main() {
             try {
                 val tools = mcpClient.listTools().tools
                 val response = openRouterClient.chat(
-                    userMessage = "Опиши доступные тебе инструменты (tools) и что они делают.",
-                    tools = tools
+                    userMessage = "мне нужно узнать сколько веток в GitHub репозитории https://github.com/bakunovgerman/McpClient",
+                    tools = tools,
+                    toolExecutor = { name, args -> mcpClient.callTool(name, args) }
                 )
                 val ts = Instant.now()
                 println("[$ts] Tools: ${tools.size}, Response: $response")
