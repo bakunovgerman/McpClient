@@ -19,27 +19,13 @@ import org.example.mcp.models.Tool
 /** Executes a tool by name with JSON arguments. Returns result or null if tool not found. */
 typealias ToolExecutor = suspend (String, JsonObject?) -> CallToolResult
 
-/**
- * Converts MCP inputSchema to OpenAI-compatible parameters.
- * Returns null when tool has no parameters.
- */
-private fun mcpSchemaToOpenAIParameters(inputSchema: JsonObject): JsonObject? {
-    val allowedKeys = setOf("type", "properties", "required")
-    val filtered = inputSchema.filterKeys { it in allowedKeys }.toMutableMap()
-    if (filtered.isEmpty() || !filtered.containsKey("properties")) return null
-    if (!filtered.containsKey("type")) {
-        filtered["type"] = JsonPrimitive("object")
-    }
-    return buildJsonObject { filtered.forEach { (k, v) -> put(k, v) } }
-}
-
 class OpenRouterClient(
     private val apiKey: String,
     private val url: String = "https://openrouter.ai/api/v1/chat/completions"
 ) {
     private val httpClient = HttpClient(CIO) {
         install(Logging) {
-            logger = Logger.DEFAULT
+            logger = prettyJsonLogger
             level = LogLevel.BODY
             sanitizeHeader { header -> header == HttpHeaders.Authorization }
         }
@@ -127,7 +113,7 @@ class OpenRouterClient(
                     )
                     for (tc in message.tool_calls) {
                         val args = parseToolArguments(tc.function.arguments)
-                        val result = toolExecutor!!(tc.function.name, args)
+                        val result = toolExecutor(tc.function.name, args)
                         val resultText = McpUtils.extractText(result)
                         val errorPrefix = if (result.isError == true) "Error: " else ""
                         messages.add(
@@ -161,6 +147,20 @@ class OpenRouterClient(
                 buildJsonObject { put("raw", JsonPrimitive(arguments)) }
             }
         }
+    }
+
+    /**
+     * Converts MCP inputSchema to OpenAI-compatible parameters.
+     * Returns null when tool has no parameters.
+     */
+    private fun mcpSchemaToOpenAIParameters(inputSchema: JsonObject): JsonObject? {
+        val allowedKeys = setOf("type", "properties", "required")
+        val filtered = inputSchema.filterKeys { it in allowedKeys }.toMutableMap()
+        if (filtered.isEmpty() || !filtered.containsKey("properties")) return null
+        if (!filtered.containsKey("type")) {
+            filtered["type"] = JsonPrimitive("object")
+        }
+        return buildJsonObject { filtered.forEach { (k, v) -> put(k, v) } }
     }
 
     fun close() {

@@ -29,9 +29,9 @@ fun main() {
     })
 
     runBlocking {
+        val tools = mcpClient.listTools().tools
         while (true) {
             try {
-                val tools = mcpClient.listTools().tools
                 val response = openRouterClient.chat(
                     userMessage = "мне нужно узнать сколько веток в GitHub репозитории https://github.com/bakunovgerman/McpClient",
                     tools = tools,
