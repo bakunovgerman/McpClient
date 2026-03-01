@@ -2,7 +2,12 @@ package org.example.openrouter
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.example.mcp.McpClient
+import org.example.mcp.McpConfig
 import java.time.Instant
+
+private const val MCP_SERVER_URL = "https://fittable-deeanna-noneditorially.ngrok-free.dev/mcp"
+private const val POLL_INTERVAL_MS = 20_000L
 
 fun main() {
     val apiKey = System.getenv("OPENROUTER_API_KEY")
@@ -11,20 +16,33 @@ fun main() {
         kotlin.system.exitProcess(1)
     }
 
-    val client = OpenRouterClient(apiKey)
-    Runtime.getRuntime().addShutdownHook(Thread { client.close() })
+    val openRouterClient = OpenRouterClient(apiKey)
+    val mcpClient = McpClient(
+        config = McpConfig(
+            url = MCP_SERVER_URL,
+            headers = mapOf("ngrok-skip-browser-warning" to "true")
+        )
+    )
+    Runtime.getRuntime().addShutdownHook(Thread {
+        openRouterClient.close()
+        mcpClient.close()
+    })
 
     runBlocking {
         while (true) {
-            delay(60_000)
             try {
-                val response = client.chat("как дела?")
+                val tools = mcpClient.listTools().tools
+                val response = openRouterClient.chat(
+                    userMessage = "Опиши доступные тебе инструменты (tools) и что они делают.",
+                    tools = tools
+                )
                 val ts = Instant.now()
-                println("[$ts] $response")
+                println("[$ts] Tools: ${tools.size}, Response: $response")
             } catch (e: Exception) {
                 System.err.println("[${Instant.now()}] Error: ${e.message}")
                 e.printStackTrace(System.err)
             }
+            delay(POLL_INTERVAL_MS)
         }
     }
 }

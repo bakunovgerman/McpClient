@@ -23,6 +23,7 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
     implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
     implementation("io.ktor:ktor-client-logging:2.3.7")
+    implementation("ch.qos.logback:logback-classic:1.4.14")
 
     // JSON serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
@@ -40,7 +41,7 @@ application {
 
 tasks.register<JavaExec>("runOpenRouterPoller") {
     group = "application"
-    description = "Run OpenRouter poller (queries LLM every minute)"
+    description = "Run OpenRouter poller (queries LLM every 20 seconds with MCP tools)"
     classpath = sourceSets.main.get().runtimeClasspath
     mainClass.set("org.example.openrouter.OpenRouterPollerKt")
 }
