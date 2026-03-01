@@ -5,6 +5,13 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.time.Instant
 
+data class LlmResponseRecord(
+    val id: Long,
+    val createdAt: String,
+    val userMessage: String?,
+    val response: String
+)
+
 /**
  * SQLite storage for LLM responses.
  * Saves date (timestamp), user message and final answer from the LLM.
@@ -57,6 +64,38 @@ class LlmResponseDb(dbPath: String = "llm_responses.db") {
                 stmt.setString(2, userMessage)
                 stmt.setString(3, response)
                 stmt.executeUpdate()
+            }
+        }
+    }
+
+    /**
+     * Returns records where created_at is in [from, to] (inclusive).
+     * Timestamps are compared as ISO-8601 strings.
+     */
+    fun getByTimeRange(from: Instant, to: Instant): List<LlmResponseRecord> {
+        val fromStr = from.toString()
+        val toStr = to.toString()
+        return withConnection { conn ->
+            conn.prepareStatement(
+                "SELECT id, created_at, user_message, response FROM llm_responses " +
+                    "WHERE created_at >= ? AND created_at <= ? ORDER BY created_at ASC"
+            ).use { stmt ->
+                stmt.setString(1, fromStr)
+                stmt.setString(2, toStr)
+                stmt.executeQuery().use { rs ->
+                    val list = mutableListOf<LlmResponseRecord>()
+                    while (rs.next()) {
+                        list.add(
+                            LlmResponseRecord(
+                                id = rs.getLong("id"),
+                                createdAt = rs.getString("created_at"),
+                                userMessage = rs.getString("user_message"),
+                                response = rs.getString("response")
+                            )
+                        )
+                    }
+                    list
+                }
             }
         }
     }

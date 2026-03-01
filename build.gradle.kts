@@ -44,7 +44,7 @@ application {
 
 tasks.register<JavaExec>("runOpenRouterPoller") {
     group = "application"
-    description = "Run OpenRouter poller (queries LLM every 20 seconds with MCP tools)"
+    description = "Run OpenRouter poller (MCP tools every 20s + summary notification every 60s)"
     classpath = sourceSets.main.get().runtimeClasspath
     mainClass.set("org.example.openrouter.OpenRouterPollerKt")
 }
