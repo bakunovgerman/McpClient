@@ -38,6 +38,13 @@ application {
     mainClass.set("org.example.MainKt")
 }
 
+tasks.register<JavaExec>("runOpenRouterPoller") {
+    group = "application"
+    description = "Run OpenRouter poller (queries LLM every minute)"
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass.set("org.example.openrouter.OpenRouterPollerKt")
+}
+
 tasks.test {
     useJUnitPlatform()
 }
