@@ -49,6 +49,13 @@ tasks.register<JavaExec>("runOpenRouterPoller") {
     mainClass.set("org.example.openrouter.OpenRouterPollerKt")
 }
 
+tasks.register<JavaExec>("runFilesystemExample") {
+    group = "application"
+    description = "Run filesystem MCP server example (npx @modelcontextprotocol/server-filesystem)"
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass.set("org.example.examples.FilesystemExampleKt")
+}
+
 tasks.test {
     useJUnitPlatform()
 }

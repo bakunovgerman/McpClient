@@ -53,7 +53,7 @@ object McpUtils {
     /**
      * Find a tool by name
      */
-    suspend fun findTool(client: McpClient, toolName: String): Tool? {
+    suspend fun findTool(client: IMcpClient, toolName: String): Tool? {
         val tools = client.listTools()
         return tools.tools.find { it.name == toolName }
     }
@@ -69,7 +69,7 @@ object McpUtils {
      * Call multiple tools in parallel
      */
     suspend fun callToolsInParallel(
-        client: McpClient,
+        client: IMcpClient,
         calls: List<Pair<String, JsonObject?>>
     ): List<Result<CallToolResult>> = coroutineScope {
         calls.map { (toolName, arguments) ->

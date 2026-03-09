@@ -19,14 +19,19 @@ import org.example.mcp.models.*
 import java.util.UUID
 
 /**
- * MCP Client for connecting to remote MCP servers
+ * MCP Client for connecting to remote MCP servers (HTTP transport)
  */
 @OptIn(ExperimentalSerializationApi::class)
 class McpClient(
     private val config: McpConfig,
     private val clientName: String = "KotlinMcpClient",
     private val clientVersion: String = "1.0.0",
-) {
+) : IMcpClient {
+    init {
+        require(config.url != null) { "McpClient requires url for HTTP transport" }
+    }
+
+    private val serverUrl: String get() = config.url!!
     private val httpClient = HttpClient(CIO) {
         install(ContentNegotiation) {
             json(Json {
@@ -61,7 +66,7 @@ class McpClient(
     /**
      * Initialize the MCP connection
      */
-    suspend fun initialize(): InitializeResult {
+    override suspend fun initialize(): InitializeResult {
         initMutex.withLock {
             if (isInitialized) {
                 return InitializeResult(
@@ -99,7 +104,7 @@ class McpClient(
     /**
      * List available resources
      */
-    suspend fun listResources(): ListResourcesResult {
+    override suspend fun listResources(): ListResourcesResult {
         ensureInitialized()
         return sendRequest("resources/list")
     }
@@ -107,7 +112,7 @@ class McpClient(
     /**
      * Read a specific resource
      */
-    suspend fun readResource(uri: String): ReadResourceResult {
+    override suspend fun readResource(uri: String): ReadResourceResult {
         ensureInitialized()
         val params = ReadResourceParams(uri = uri)
         return sendRequest(
@@ -119,7 +124,7 @@ class McpClient(
     /**
      * List available tools
      */
-    suspend fun listTools(): ListToolsResult {
+    override suspend fun listTools(): ListToolsResult {
         ensureInitialized()
         return sendRequest("tools/list")
     }
@@ -127,7 +132,7 @@ class McpClient(
     /**
      * Call a tool
      */
-    suspend fun callTool(name: String, arguments: JsonObject? = null): CallToolResult {
+    override suspend fun callTool(name: String, arguments: JsonObject?): CallToolResult {
         ensureInitialized()
         val params = CallToolParams(name = name, arguments = arguments)
         return sendRequest(
@@ -139,7 +144,7 @@ class McpClient(
     /**
      * List available prompts
      */
-    suspend fun listPrompts(): ListPromptsResult {
+    override suspend fun listPrompts(): ListPromptsResult {
         ensureInitialized()
         return sendRequest("prompts/list")
     }
@@ -162,11 +167,11 @@ class McpClient(
         
         // Always show request for debugging Parse error
         println("\n=== REQUEST ===")
-        println("URL: ${config.url}")
+        println("URL: $serverUrl")
         println("Body: $requestBody")
         println("===============\n")
 
-        val response: HttpResponse = httpClient.post(config.url) {
+        val response: HttpResponse = httpClient.post(serverUrl) {
             contentType(ContentType.Application.Json)
             
             // MCP requires both application/json and text/event-stream in Accept header
@@ -225,7 +230,7 @@ class McpClient(
     /**
      * Close the client and release resources
      */
-    fun close() {
+    override fun close() {
         httpClient.close()
     }
 }
