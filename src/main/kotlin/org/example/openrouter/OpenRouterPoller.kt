@@ -1,8 +1,10 @@
 package org.example.openrouter
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.example.mcp.McpClient
 import org.example.mcp.McpConfig
 import org.example.storage.LlmResponseDb
@@ -51,7 +53,6 @@ fun main() {
                         val summary = getSummaryFromLlm(openRouterClient, records)
                         showMacNotification("LLM Summary", summary)
                         println("Summary: - $summary")
-                      //  println("[${now}] Summary: notified ${records.size} record(s)")
                     }
                 } catch (e: Exception) {
                     System.err.println("[${Instant.now()}] Summary error: ${e.message}")
@@ -98,20 +99,45 @@ private suspend fun getSummaryFromLlm(client: OpenRouterClient, records: List<Ll
 }
 
 private fun showMacNotification(title: String, message: String) {
-    val escapedTitle = title.replace("'", "\\'").replace("\"", "\\\"")
+    val escapedTitle = title.replace("\\", "\\\\").replace("\"", "\\\"")
     val escapedMessage = message
         .replace("\\", "\\\\")
-        .replace("'", "\\'")
         .replace("\"", "\\\"")
         .replace("\n", " ")
         .take(200)
     val script = "display notification \"$escapedMessage\" with title \"$escapedTitle\""
     try {
-        ProcessBuilder("osascript", "-e", script)
-            .redirectError(ProcessBuilder.Redirect.DISCARD)
-            .redirectOutput(ProcessBuilder.Redirect.DISCARD)
+        // Try launchctl asuser first - runs in user's GUI session, fixes "Connection to notification center invalid"
+        val uid = runCatching {
+            ProcessBuilder("id", "-u")
+                .redirectError(ProcessBuilder.Redirect.PIPE)
+                .redirectOutput(ProcessBuilder.Redirect.PIPE)
+                .start()
+                .inputStream.bufferedReader().readText().trim()
+        }.getOrNull()
+        if (!uid.isNullOrBlank()) {
+            val process = ProcessBuilder(
+                "launchctl", "asuser", uid,
+                "/usr/bin/osascript", "-e", script
+            )
+                .redirectError(ProcessBuilder.Redirect.PIPE)
+                .redirectOutput(ProcessBuilder.Redirect.PIPE)
+                .start()
+            val exitCode = process.waitFor()
+            if (exitCode == 0) return
+            val err = process.errorStream.bufferedReader().readText().trim()
+            if (err.isNotEmpty()) System.err.println("launchctl osascript: $err")
+        }
+        // Fallback: direct osascript (works when run from Terminal.app)
+        val process = ProcessBuilder("/usr/bin/osascript", "-e", script)
+            .redirectError(ProcessBuilder.Redirect.PIPE)
+            .redirectOutput(ProcessBuilder.Redirect.PIPE)
             .start()
-            .waitFor()
+        val exitCode = process.waitFor()
+        if (exitCode != 0) {
+            val err = process.errorStream.bufferedReader().readText().trim()
+            System.err.println("osascript failed (exit $exitCode): $err")
+        }
     } catch (e: Exception) {
         System.err.println("Failed to show notification: ${e.message}")
     }
