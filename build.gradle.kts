@@ -56,6 +56,13 @@ tasks.register<JavaExec>("runFilesystemExample") {
     mainClass.set("org.example.examples.FilesystemExampleKt")
 }
 
+tasks.register<JavaExec>("runGitHubInfoAgent") {
+    group = "application"
+    description = "Run GitHub info agent: asks LLM about repo branches, saves result to github-info via MCP"
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass.set("org.example.agent.GitHubInfoAgentKt")
+}
+
 tasks.test {
     useJUnitPlatform()
 }
