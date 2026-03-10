@@ -63,6 +63,13 @@ tasks.register<JavaExec>("runGitHubInfoAgent") {
     mainClass.set("org.example.agent.GitHubInfoAgentKt")
 }
 
+tasks.register<JavaExec>("runDockerEnvAgent") {
+    group = "application"
+    description = "Run Docker env agent: uses run_process to run Docker, saves output via MCP"
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass.set("org.example.agent.DockerEnvAgentKt")
+}
+
 tasks.test {
     useJUnitPlatform()
 }
