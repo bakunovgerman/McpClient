@@ -1,12 +1,54 @@
 package org.example.agent
 
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.JsonPrimitive
 import org.example.mcp.IMcpClient
 import org.example.mcp.McpClientFactory
 import org.example.mcp.McpUtils
+import org.example.mcp.models.CallToolResult
 import org.example.mcp.models.Tool
 import org.example.openrouter.OpenRouterClient
+import org.example.openrouter.ToolExecutor
 import java.io.File
+
+/** Разрешённые ключевые слова в команде для run_process. Если команда содержит хотя бы одно — выполняется без подтверждения. */
+private val ALLOWED_COMMAND_KEYWORDS = setOf("docker", "podman",)
+
+/** Создаёт обёртку над toolExecutor с проверкой разрешённых команд для run_process. */
+private fun wrapToolExecutorWithCommandCheck(
+    baseExecutor: ToolExecutor,
+    allowedKeywords: Set<String> = ALLOWED_COMMAND_KEYWORDS
+): ToolExecutor = { name, args ->
+    if (name != "run_process") {
+        baseExecutor(name, args)
+    } else {
+        val command = args?.get("command")?.let {
+            when (it) {
+                is JsonPrimitive -> it.content
+                else -> it.toString()
+            }
+        } ?: ""
+        val isAllowed = allowedKeywords.any { keyword ->
+            keyword.lowercase() in command.lowercase()
+        }
+        if (!isAllowed) {
+            print("Команда не в разрешённом списке (${allowedKeywords.joinToString()}): $command\nВыполнить? [y/N]: ")
+            val answer = readlnOrNull()?.trim()?.lowercase()
+            if (answer != "y" && answer != "yes") {
+                CallToolResult(
+                    content = listOf(
+                        org.example.mcp.models.ToolContent(text = "Пользователь отклонил выполнение команды: $command")
+                    ),
+                    isError = true
+                )
+            } else {
+                baseExecutor(name, args)
+            }
+        } else {
+            baseExecutor(name, args)
+        }
+    }
+}
 
 private fun configPath(): String {
     System.getenv("MCP_CONFIG_PATH")?.let { path ->
@@ -18,13 +60,9 @@ private fun configPath(): String {
     ).firstOrNull { java.io.File(it).exists() } ?: "src/main/resources/mcp-config.json"
 }
 
-private val DEFAULT_PROMPT = """
-    Подключись к реальному окружению и выполни следующие шаги:
-    1. Проверь, что Docker доступен (выполни `docker --version` или `docker ps`)
-    2. Запусти тестовый контейнер: `docker run --rm hello-world`
-    3. Сохрани полный вывод команд в файл docker-output с помощью инструмента write_file
-
-    Если Docker недоступен, попробуй альтернативу (например, podman) или запиши в файл информацию об ошибке.
+/** Тестовый промпт для проверки версии Java (команда java в разрешённом списке). */
+private val TEST_JAVA_PROMPT = """
+    Проверь версию Java в системе: выполни команду `java -version` и выведи результат.
 """.trimIndent()
 
 private fun loadApiKey(): String {
@@ -43,7 +81,7 @@ fun main(args: Array<String>) = runBlocking {
         kotlin.system.exitProcess(1)
     }
 
-    val userPrompt = args.firstOrNull()?.takeIf { it.isNotBlank() } ?: DEFAULT_PROMPT
+    val userPrompt = args.firstOrNull()?.takeIf { it.isNotBlank() } ?: TEST_JAVA_PROMPT
     val workspaceFolder = System.getenv("WORKSPACE_FOLDER") ?: System.getProperty("user.dir", ".")
 
     val configPath = configPath()
@@ -66,11 +104,12 @@ fun main(args: Array<String>) = runBlocking {
         }
 
         val openRouterClient = OpenRouterClient(apiKey)
-        val toolExecutor: org.example.openrouter.ToolExecutor = { name, args ->
+        val baseExecutor: ToolExecutor = { name, args ->
             val client = toolToClient[name]
                 ?: throw IllegalStateException("Unknown tool: $name")
             client.callTool(name, args)
         }
+        val toolExecutor = wrapToolExecutorWithCommandCheck(baseExecutor)
 
         println("DockerEnvAgent: ${allTools.size} tools from ${clients.size} MCP servers")
         println("Tools: ${allTools.map { it.name }.joinToString(", ")}")
