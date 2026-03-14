@@ -1,11 +1,5 @@
 {
   "mcpServers": {
-    "gitHubMcp": {
-      "url": "https://fittable-deeanna-noneditorially.ngrok-free.dev/mcp",
-      "headers": {
-        "ngrok-skip-browser-warning": "true"
-      }
-    },
     "filesystem": {
       "command": "npx",
       "args": [

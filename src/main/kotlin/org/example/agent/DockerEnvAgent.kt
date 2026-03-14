@@ -1,6 +1,7 @@
 package org.example.agent
 
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import org.example.mcp.IMcpClient
 import org.example.mcp.McpClientFactory
@@ -12,7 +13,24 @@ import org.example.openrouter.ToolExecutor
 import java.io.File
 
 /** Разрешённые ключевые слова в команде для run_process. Если команда содержит хотя бы одно — выполняется без подтверждения. */
-private val ALLOWED_COMMAND_KEYWORDS = setOf("docker", "podman",)
+private val ALLOWED_COMMAND_KEYWORDS = setOf("docker", "podman")
+
+/** Извлекает строку команды из аргументов run_process. Поддерживает command, command_line, argv. */
+private fun extractCommandFromArgs(args: kotlinx.serialization.json.JsonObject?): String {
+    if (args == null) return ""
+    for (key in listOf("command", "command_line", "argv")) {
+        val value = args[key] ?: continue
+        val str = when (value) {
+            is JsonPrimitive -> value.content.toString()
+            is JsonArray -> value.joinToString(" ") { (it as? JsonPrimitive)?.content?.toString() ?: it.toString() }
+            else -> value.toString()
+        }
+        if (str.isNotBlank()) {
+            return str
+        }
+    }
+    return args.toString()
+}
 
 /** Создаёт обёртку над toolExecutor с проверкой разрешённых команд для run_process. */
 private fun wrapToolExecutorWithCommandCheck(
@@ -22,12 +40,7 @@ private fun wrapToolExecutorWithCommandCheck(
     if (name != "run_process") {
         baseExecutor(name, args)
     } else {
-        val command = args?.get("command")?.let {
-            when (it) {
-                is JsonPrimitive -> it.content
-                else -> it.toString()
-            }
-        } ?: ""
+        val command = extractCommandFromArgs(args)
         val isAllowed = allowedKeywords.any { keyword ->
             keyword.lowercase() in command.lowercase()
         }
@@ -62,7 +75,7 @@ private fun configPath(): String {
 
 /** Тестовый промпт для проверки версии Java (команда java в разрешённом списке). */
 private val TEST_JAVA_PROMPT = """
-    Проверь версию Java в системе: выполни команду `java -version` и выведи результат.
+    Проверь версию Java в системе
 """.trimIndent()
 
 private fun loadApiKey(): String {
